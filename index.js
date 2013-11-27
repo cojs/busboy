@@ -2,33 +2,52 @@ var Busboy = require('busboy')
 
 module.exports = function (request, options) {
   options = options || {}
+  options.headers = request.headers
 
-  var busboy = new Busboy(request.headers)
+  var busboy = new Busboy(options)
   var fields = []
   var ended = false
   var error
 
+  // not sure if busboy already handles this
+  request.on('close', busboyCleanup)
+
   busboy
-  .on('field', function () {
-    fields.push([].slice.call(arguments))
-  })
-  .on('error', function (err) {
-    error = err
-  })
-  .once('end', function () {
-    ended = true
-  })
+  .on('field', onField)
+  .on('error', onBusboyError)
+  .on('end', onBusboyEnd)
 
   return {
     part: onPart,
     fields: fields
   }
 
+  function onField() {
+    fields.push([].slice.call(arguments))
+  }
+
+  function onBusboyError(err) {
+    error = err
+  }
+
+  function onBusboyEnd() {
+    ended = true
+    busboyCleanup()
+  }
+
+  function busboyCleanup() {
+    // totally unnecessary but i'm a stickler for cleaning up
+    request.removeListener('close', busboyCleanup)
+    busboy.removeListener('field', onField)
+    busboy.removeListener('error', onBusboyError)
+    busboy.removeListener('end', onBusboyEnd)
+  }
+
   function* onPart() {
     if (ended)
-      throw new Error('already ended')
+      return
     if (error) {
-      ended = true
+      busboyCleanup()
       throw error
     }
 
@@ -38,7 +57,8 @@ module.exports = function (request, options) {
   function nextPart(done) {
     busboy
     .on('file', onFile)
-    .on('error', onError)
+    .on('error', onEnd)
+    .on('end', onEnd)
 
     function onFile(fieldname, file, filename, encoding, mimetype) {
       cleanup()
@@ -50,15 +70,15 @@ module.exports = function (request, options) {
       done(null, file)
     }
 
-    function onError(err) {
+    function onEnd(err) {
       cleanup()
-      ended = true
       done(err)
     }
 
     function cleanup() {
       busboy.removeListener('file', onFile)
-      busboy.removeListener('error', onError)
+      busboy.removeListener('error', onEnd)
+      busboy.removeListener('end', onEnd)
     }
   }
 }
