@@ -21,9 +21,9 @@
     "busboy": "~0.0.12"
   },
   "devDependencies": {
+    "co": "*",
     "mocha": "*",
-    "koa": "koajs/koa",
-    "supertest": "*"
+    "should": "*"
   },
   "scripts": {
     "test": "make test"

@@ -11,7 +11,6 @@ module.exports = function (request, options) {
   var ended = false
   var error
 
-  // not sure if busboy already handles this
   request.on('close', busboyCleanup)
 
   busboy
@@ -23,10 +22,12 @@ module.exports = function (request, options) {
 
   return {
     part: onPart,
+    file: onPart,
     fields: fields
   }
 
   function onField() {
+    // to do: make into an object
     fields.push([].slice.call(arguments))
   }
 
@@ -55,14 +56,14 @@ module.exports = function (request, options) {
       throw error
     }
 
-    yield nextPart
+    return yield nextPart
   }
 
   function nextPart(done) {
     busboy
     .on('file', onFile)
-    .on('error', onEnd)
-    .on('end', onEnd)
+    .on('error', onPartEnd)
+    .on('end', onPartEnd)
 
     function onFile(fieldname, file, filename, encoding, mimetype) {
       cleanup()
@@ -74,15 +75,15 @@ module.exports = function (request, options) {
       done(null, file)
     }
 
-    function onEnd(err) {
+    function onPartEnd(err) {
       cleanup()
       done(err)
     }
 
     function cleanup() {
       busboy.removeListener('file', onFile)
-      busboy.removeListener('error', onEnd)
-      busboy.removeListener('end', onEnd)
+      busboy.removeListener('error', onPartEnd)
+      busboy.removeListener('end', onPartEnd)
     }
   }
 }
