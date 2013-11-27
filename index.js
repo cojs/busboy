@@ -1,6 +1,8 @@
 var Busboy = require('busboy')
 
 module.exports = function (request, options) {
+  // koa special sauce
+  request = request.req || request
   options = options || {}
   options.headers = request.headers
 
@@ -16,6 +18,8 @@ module.exports = function (request, options) {
   .on('field', onField)
   .on('error', onBusboyError)
   .on('end', onBusboyEnd)
+
+  request.pipe(busboy)
 
   return {
     part: onPart,
