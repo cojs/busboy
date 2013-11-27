@@ -1,0 +1,31 @@
+{
+  "name": "co-busboy",
+  "description": "Busboy multipart parser as a yieldable",
+  "version": "0.0.1",
+  "author": {
+    "name": "Jonathan Ong",
+    "email": "me@jongleberry.com",
+    "url": "http://jongleberry.com",
+    "twitter": "https://twitter.com/jongleberry"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonathanong/co-busboy.git"
+  },
+  "bugs": {
+    "mail": "me@jongleberry.com",
+    "url": "https://github.com/jonathanong/co-busboy/issues"
+  },
+  "dependencies": {
+    "busboy": "~0.0.12"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "koa": "koajs/koa",
+    "supertest": "*"
+  },
+  "scripts": {
+    "test": "make test"
+  }
+}
