@@ -8,15 +8,21 @@
 var parse = require('co-busboy')
 
 app.use(function* (next) {
-  var parser = parse(this.req)
-  var part
-  while (part = yield* parser.part()) {
-    // each `part` is a readable stream
-    part.pipe(fs.createWriteStream('some file.txt'))
+  var parts = parse(this.req)
+  while (part = yield parts) {
+    if (part.length) {
+      // array-like objects are "busboy" fields
+      console.log('key: ' + part[0])
+      console.log('value: ' + part[1])
+    } else {
+      // otherwise, it's a stream
+      part.pipe(fs.createWriteStream('some file.txt'))
+    }
   }
-  var fields = parser.fields // regular fields
 })
 ```
+
+Note that parts will be delievered in the order they are defined in the form.
 
 ## License
 

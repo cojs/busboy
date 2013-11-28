@@ -35,14 +35,20 @@ describe('Co Busboy', function () {
     ].join('\r\n'))
 
     co(function*(){
-      var parser = busboy(request);
+      var parts = busboy(request);
       var part;
-      var count = 0
-      while (part = yield parser.part()) {
-        count++
-        part.resume()
+      var fields = 0;
+      var streams = 0;
+      while (part = yield parts) {
+        if (part.length) {
+          fields++
+        } else {
+          streams++
+          part.resume()
+        }
       }
-      assert.equal(count, 2)
+      assert.equal(fields, 2)
+      assert.equal(streams, 2)
     })(done)
   })
 })

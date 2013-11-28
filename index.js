@@ -1,89 +1,51 @@
 var Busboy = require('busboy')
+var chan = require('chan')
 
 module.exports = function (request, options) {
+  var ch = chan()
+
   // koa special sauce
   request = request.req || request
   options = options || {}
   options.headers = request.headers
 
   var busboy = new Busboy(options)
-  var fields = []
-  var ended = false
-  var error
 
-  request.on('close', busboyCleanup)
+  request.on('close', cleanup)
 
   busboy
   .on('field', onField)
-  .on('error', onBusboyError)
-  .on('end', onBusboyEnd)
+  .on('file', onFile)
+  .on('error', onEnd)
+  .on('end', onEnd)
 
   request.pipe(busboy)
 
-  return {
-    part: onPart,
-    file: onPart,
-    fields: fields
-  }
+  return ch
 
   function onField() {
-    // to do: make into an object
-    fields.push([].slice.call(arguments))
+    ch(arguments)
   }
 
-  function onBusboyError(err) {
-    error = err
+  function onFile(fieldname, file, filename, encoding, mimetype) {
+    // opinionated, but 5 arguments is ridiculous
+    file.fieldname = fieldname
+    file.filename = filename
+    file.encoding = encoding
+    file.mime = file.mimetype = mimetype
+    ch(file)
   }
 
-  function onBusboyEnd() {
-    ended = true
-    busboyCleanup()
+  function onEnd(err) {
+    cleanup()
+    ch(err)
   }
 
-  function busboyCleanup() {
-    // totally unnecessary but i'm a stickler for cleaning up
-    request.removeListener('close', busboyCleanup)
+  function cleanup() {
+    request.removeListener('close', cleanup)
     busboy.removeListener('field', onField)
-    busboy.removeListener('error', onBusboyError)
-    busboy.removeListener('end', onBusboyEnd)
-  }
-
-  function* onPart() {
-    if (ended)
-      return
-    if (error) {
-      busboyCleanup()
-      throw error
-    }
-
-    return yield nextPart
-  }
-
-  function nextPart(done) {
-    busboy
-    .on('file', onFile)
-    .on('error', onPartEnd)
-    .on('end', onPartEnd)
-
-    function onFile(fieldname, file, filename, encoding, mimetype) {
-      cleanup()
-      // opinionated, but 5 arguments is ridiculous
-      file.fieldname = fieldname
-      file.filename = filename
-      file.encoding = encoding
-      file.mime = file.mimetype = mimetype
-      done(null, file)
-    }
-
-    function onPartEnd(err) {
-      cleanup()
-      done(err)
-    }
-
-    function cleanup() {
-      busboy.removeListener('file', onFile)
-      busboy.removeListener('error', onPartEnd)
-      busboy.removeListener('end', onPartEnd)
-    }
+    busboy.removeListener('file', onFile)
+    busboy.removeListener('error', onEnd)
+    busboy.removeListener('end', onEnd)
   }
 }
