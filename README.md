@@ -24,6 +24,7 @@ app.use(function* (next) {
 ```
 
 Note that parts will be delievered in the order they are defined in the form.
+Put your CSRF first in the form and your larger files last.
 
 ## License
 
