@@ -8,6 +8,7 @@ module.exports = function (request, options) {
 
   // koa special sauce
   request = request.req || request
+
   options = options || {}
   options.headers = request.headers
 
@@ -47,8 +48,8 @@ module.exports = function (request, options) {
     // opinionated, but 5 arguments is ridiculous
     file.fieldname = fieldname
     file.filename = filename
-    file.encoding = encoding
-    file.mime = file.mimetype = mimetype
+    file.transferEncoding = file.encoding = encoding
+    file.mimeType = file.mime = mimetype
     ch(file)
   }
 
