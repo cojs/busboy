@@ -1,6 +1,8 @@
 var Busboy = require('busboy')
 var chan = require('chan')
 
+var slice = [].slice
+
 module.exports = function (request, options) {
   var ch = chan()
 
@@ -21,10 +23,24 @@ module.exports = function (request, options) {
 
   request.pipe(busboy)
 
+  // i would just put everything in an array
+  // but people will complain
+  if (options.autoFields) {
+    var field = ch.field = {} // object lookup
+    var fields = ch.fields = [] // list lookup
+  }
+
   return ch
 
   function onField() {
-    ch(arguments)
+    var args = slice.call(arguments)
+
+    if (options.autoFields) {
+      field[args[0]] = args[1]
+      fields.push(args)
+    } else {
+      ch(args)
+    }
   }
 
   function onFile(fieldname, file, filename, encoding, mimetype) {

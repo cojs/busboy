@@ -11,7 +11,7 @@ app.use(function* (next) {
   var parts = parse(this)
   while (part = yield parts) {
     if (part.length) {
-      // array-like objects are "busboy" fields
+      // arrays are "busboy" fields
       console.log('key: ' + part[0])
       console.log('value: ' + part[1])
     } else {
@@ -20,6 +20,27 @@ app.use(function* (next) {
     }
   }
   console.log('and we are done parsing the form!')
+})
+```
+
+If you want `co-busboy` to automatically handle the fields,
+set the `autoFields: true` option.
+Now all the parts will be streams.
+
+```js
+var parse = require('co-busboy')
+
+app.use(function* (next) {
+  var parts = parse(this)
+  while (part = yield parts) {
+    // it's a stream
+    part.pipe(fs.createWriteStream('some file.txt'))
+  }
+  console.log('and we are done parsing the form!')
+  // .field holds all the fields in key/value form
+  console.log(parts.field._csrf)
+  // .fields holds all the fields in [key, value] form
+  console.log(parts.fields[0])
 })
 ```
 
