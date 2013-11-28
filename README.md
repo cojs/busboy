@@ -19,6 +19,7 @@ app.use(function* (next) {
       part.pipe(fs.createWriteStream('some file.txt'))
     }
   }
+  console.log('and we are done parsing the form!')
 })
 ```
 
