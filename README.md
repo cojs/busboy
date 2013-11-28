@@ -8,7 +8,7 @@
 var parse = require('co-busboy')
 
 app.use(function* (next) {
-  var parts = parse(this.req)
+  var parts = parse(this)
   while (part = yield parts) {
     if (part.length) {
       // array-like objects are "busboy" fields
@@ -24,7 +24,7 @@ app.use(function* (next) {
 ```
 
 Note that parts will be delievered in the order they are defined in the form.
-Put your CSRF first in the form and your larger files last.
+Put your CSRF token first in the form and your larger files last.
 
 ## License
 
