@@ -19,6 +19,7 @@ module.exports = function (request, options) {
   busboy
   .on('field', onField)
   .on('file', onFile)
+  .on('close', cleanup)
   .on('error', onEnd)
   .on('end', onEnd)
 
@@ -62,6 +63,7 @@ module.exports = function (request, options) {
     request.removeListener('close', cleanup)
     busboy.removeListener('field', onField)
     busboy.removeListener('file', onFile)
+    busboy.removeListener('close', cleanup)
     busboy.removeListener('error', onEnd)
     busboy.removeListener('end', onEnd)
   }
