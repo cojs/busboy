@@ -46,7 +46,7 @@ module.exports = function (request, options) {
   }
 
   function onFile(fieldname, file, filename, encoding, mimetype) {
-    https://github.com/mscdex/busboy/issues/16
+    // https://github.com/mscdex/busboy/issues/16
     if (!filename)
       return file.resume()
     // opinionated, but 5 arguments is ridiculous
