@@ -1,7 +1,7 @@
 {
   "name": "co-busboy",
   "description": "Busboy multipart parser as a yieldable",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
     "name": "Jonathan Ong",
     "email": "me@jongleberry.com",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "busboy": "~0.0.12",
-    "chan": "brentburgoyne/chan"
+    "chan": "~0.2.0"
   },
   "devDependencies": {
     "co": "*",
