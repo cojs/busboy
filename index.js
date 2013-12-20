@@ -1,6 +1,7 @@
 var Busboy = require('busboy')
 var chan = require('chan')
 
+var getDescriptor = Object.getOwnPropertyDescriptor
 var slice = [].slice
 
 module.exports = function (request, options) {
@@ -38,8 +39,10 @@ module.exports = function (request, options) {
     var args = slice.call(arguments)
 
     if (options.autoFields) {
-      field[args[0]] = args[1]
       fields.push(args)
+      // don't overwrite prototypes
+      if (getDescriptor(Object.prototype, args[0])) return
+      field[args[0]] = args[1]
     } else {
       ch(args)
     }
