@@ -19,7 +19,7 @@ describe('Co Busboy', function () {
           part.resume()
         }
       }
-      assert.equal(fields, 3)
+      assert.equal(fields, 4)
       assert.equal(streams, 2)
     })(done)
   })
@@ -42,8 +42,22 @@ describe('Co Busboy', function () {
       }
       assert.equal(fields, 0)
       assert.equal(streams, 2)
-      assert.equal(parts.fields.length, 3)
+      assert.equal(parts.fields.length, 4)
       assert.equal(Object.keys(parts.field).length, 2)
+    })(done)
+  })
+  
+  it('should work with autofields and arrays', function (done) {
+    co(function*(){
+      var parts = busboy(request(), {
+        autoFields: true
+      });
+      var part;
+      while (part = yield parts) {
+        part.resume()
+      }
+      assert.equal(Object.keys(parts.field).length, 2)
+      assert.equal(parts.field['file_name_0'].length, 2)
     })(done)
   })
 
@@ -98,9 +112,13 @@ function request() {
     '',
     'super alpha file',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
-    'Content-Disposition: form-data; name="file_name_1"',
+    'Content-Disposition: form-data; name="file_name_0"',
     '',
     'super beta file',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="file_name_1"',
+    '',
+    'super gamma file',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="hasOwnProperty"',
     '',

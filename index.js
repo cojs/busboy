@@ -2,6 +2,7 @@ var Busboy = require('busboy')
 var chan = require('chan')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
+var isArray = Array.isArray;
 var slice = [].slice
 
 module.exports = function (request, options) {
@@ -35,14 +36,19 @@ module.exports = function (request, options) {
 
   return ch
 
-  function onField() {
+  function onField(name, val) {
     var args = slice.call(arguments)
 
     if (options.autoFields) {
       fields.push(args)
+      
       // don't overwrite prototypes
-      if (getDescriptor(Object.prototype, args[0])) return
-      field[args[0]] = args[1]
+      if (getDescriptor(Object.prototype, name)) return
+      
+      var prev = field[name]
+      if (!prev) return field[name] = val
+      if (Array.isArray(prev)) return prev.push(val)
+      field[name] = [prev, val]
     } else {
       ch(args)
     }
