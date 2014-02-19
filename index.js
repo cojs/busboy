@@ -23,7 +23,7 @@ module.exports = function (request, options) {
   .on('file', onFile)
   .on('close', cleanup)
   .on('error', onEnd)
-  .on('end', onEnd)
+  .on('finish', onEnd)
 
   request.pipe(busboy)
 
@@ -74,6 +74,6 @@ module.exports = function (request, options) {
     busboy.removeListener('file', onFile)
     busboy.removeListener('close', cleanup)
     busboy.removeListener('error', onEnd)
-    busboy.removeListener('end', onEnd)
+    busboy.removeListener('finish', onEnd)
   }
 }
