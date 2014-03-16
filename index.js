@@ -46,7 +46,7 @@ module.exports = function (request, options) {
       if (getDescriptor(Object.prototype, name)) return
       
       var prev = field[name]
-      if (!prev) return field[name] = val
+      if (prev == null) return field[name] = val
       if (Array.isArray(prev)) return prev.push(val)
       field[name] = [prev, val]
     } else {
