@@ -8,6 +8,9 @@
 var parse = require('co-busboy')
 
 app.use(function* (next) {
+  // the body isn't multipart, so busboy can't parse it
+  if (!this.request.is('multipart/*')) return yield next
+  
   var parts = parse(this)
   var part
   while (part = yield parts) {
