@@ -10,7 +10,7 @@ var parse = require('co-busboy')
 app.use(function* (next) {
   // the body isn't multipart, so busboy can't parse it
   if (!this.request.is('multipart/*')) return yield next
-  
+
   var parts = parse(this)
   var part
   while (part = yield parts) {
@@ -38,7 +38,9 @@ Now all the parts will be streams and a field object and array will automaticall
 var parse = require('co-busboy')
 
 app.use(function* (next) {
-  var parts = parse(this)
+  var parts = parse(this, {
+    autoFields: true
+  })
   var part
   while (part = yield parts) {
     // it's a stream
@@ -58,7 +60,7 @@ app.use(function* (next) {
 
 ```js
 var parse = require('co-busboy')
-var parts = parse(stream {
+var parts = parse(stream, {
   autoFields: true
 })
 ```
