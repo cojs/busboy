@@ -47,7 +47,7 @@ module.exports = function (request, options) {
       
       var prev = field[name]
       if (prev == null) return field[name] = val
-      if (Array.isArray(prev)) return prev.push(val)
+      if (isArray(prev)) return prev.push(val)
       field[name] = [prev, val]
     } else {
       ch(args)
