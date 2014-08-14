@@ -46,7 +46,7 @@ describe('Co Busboy', function () {
       assert.equal(Object.keys(parts.field).length, 2)
     })(done)
   })
-  
+
   it('should work with autofields and arrays', function (done) {
     co(function*(){
       var parts = busboy(request(), {
@@ -76,7 +76,7 @@ describe('Co Busboy', function () {
       assert.equal(streams, 2)
     })(done)
   })
-  
+
   it('should not overwrite prototypes', function (done) {
     co(function*(){
       var parts = busboy(request(), {
@@ -87,6 +87,28 @@ describe('Co Busboy', function () {
         if (!part.length) part.resume()
       };
       assert.equal(parts.field.hasOwnProperty, Object.prototype.hasOwnProperty);
+    })(done)
+  })
+
+  it('should throw error when the files limit is reached', function (done) {
+    co(function*(){
+      var parts = busboy(request(), {
+        limits: {
+          files: 1
+        }
+      });
+      var part;
+      var error;
+      try {
+        while (part = yield parts) {
+          if (!part.length) part.resume()
+        }
+      } catch (e) {
+        error = e
+      }
+
+      assert.equal(error.message, 'reach files limit')
+      assert.equal(error.status, 400)
     })(done)
   })
 })

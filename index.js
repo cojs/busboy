@@ -25,6 +25,27 @@ module.exports = function (request, options) {
   .on('error', onEnd)
   .on('finish', onEnd)
 
+  busboy.on('partsLimit', function(){
+    var err = new Error('reach parts limit')
+    err.code = 'busboy_limits'
+    err.status = 400
+    onEnd(err)
+  })
+
+  busboy.on('filesLimit', function(){
+    var err = new Error('reach files limit')
+    err.code = 'busboy_limits'
+    err.status = 400
+    onEnd(err)
+  })
+
+  busboy.on('fieldsLimit', function(){
+    var err = new Error('reach fields limit')
+    err.code = 'busboy_limits'
+    err.status = 400
+    onEnd(err)
+  })
+
   request.pipe(busboy)
 
   // i would just put everything in an array
@@ -41,10 +62,10 @@ module.exports = function (request, options) {
 
     if (options.autoFields) {
       fields.push(args)
-      
+
       // don't overwrite prototypes
       if (getDescriptor(Object.prototype, name)) return
-      
+
       var prev = field[name]
       if (prev == null) return field[name] = val
       if (isArray(prev)) return prev.push(val)
@@ -74,6 +95,9 @@ module.exports = function (request, options) {
     busboy.removeListener('file', onFile)
     busboy.removeListener('close', cleanup)
     busboy.removeListener('error', onEnd)
+    busboy.removeListener('partsLimit', onEnd)
+    busboy.removeListener('filesLimit', onEnd)
+    busboy.removeListener('fieldsLimit', onEnd)
     busboy.removeListener('finish', onEnd)
   }
 }
