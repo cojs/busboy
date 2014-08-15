@@ -65,8 +65,10 @@ var parts = parse(stream, {
 })
 ```
 
-`options` are passed to busboy.
+`options` are passed to [busboy](https://github.com/mscdex/busboy).
 The only additional option is `autoFields`.
+
+**Note**: If busboy events `partsLimit`, `filesLimit`, `fieldsLimit` is emitted, will throw an error.
 
 ### part = yield parts
 
