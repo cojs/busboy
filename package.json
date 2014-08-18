@@ -18,8 +18,8 @@
     "url": "https://github.com/jonathanong/co-busboy/issues"
   },
   "dependencies": {
-    "busboy": "~0.2.3",
-    "chan": "~0.3.0"
+    "busboy": "^0.2.8",
+    "chan": "^0.6.1"
   },
   "devDependencies": {
     "co": "*",
