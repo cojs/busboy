@@ -107,8 +107,9 @@ describe('Co Busboy', function () {
         error = e
       }
 
-      assert.equal(error.message, 'reach files limit')
-      assert.equal(error.status, 400)
+      assert.equal(error.status, 413)
+      assert.equal(error.code, 'Request_files_limit')
+      assert.equal(error.message, 'Reach files limit')
     })(done)
   })
 })

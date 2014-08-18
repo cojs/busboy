@@ -26,23 +26,23 @@ module.exports = function (request, options) {
   .on('finish', onEnd)
 
   busboy.on('partsLimit', function(){
-    var err = new Error('reach parts limit')
-    err.code = 'busboy_limits'
-    err.status = 400
+    var err = new Error('Reach parts limit')
+    err.code = 'Request_parts_limit'
+    err.status = 413
     onEnd(err)
   })
 
   busboy.on('filesLimit', function(){
-    var err = new Error('reach files limit')
-    err.code = 'busboy_limits'
-    err.status = 400
+    var err = new Error('Reach files limit')
+    err.code = 'Request_files_limit'
+    err.status = 413
     onEnd(err)
   })
 
   busboy.on('fieldsLimit', function(){
-    var err = new Error('reach fields limit')
-    err.code = 'busboy_limits'
-    err.status = 400
+    var err = new Error('Reach fields limit')
+    err.code = 'Request_fields_limit'
+    err.status = 413
     onEnd(err)
   })
 
