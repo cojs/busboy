@@ -5,8 +5,8 @@ var assert = require('assert')
 var busboy = require('./')
 
 describe('Co Busboy', function () {
-  it('should work without autofields', function (done) {
-    co(function*(){
+  it('should work without autofields', function () {
+    return co(function*(){
       var parts = busboy(request());
       var part;
       var fields = 0;
@@ -21,11 +21,11 @@ describe('Co Busboy', function () {
       }
       assert.equal(fields, 4)
       assert.equal(streams, 2)
-    })(done)
+    })
   })
 
-  it('should work with autofields', function (done) {
-    co(function*(){
+  it('should work with autofields', function () {
+    return co(function*(){
       var parts = busboy(request(), {
         autoFields: true
       });
@@ -44,11 +44,11 @@ describe('Co Busboy', function () {
       assert.equal(streams, 2)
       assert.equal(parts.fields.length, 4)
       assert.equal(Object.keys(parts.field).length, 2)
-    })(done)
+    })
   })
 
-  it('should work with autofields and arrays', function (done) {
-    co(function*(){
+  it('should work with autofields and arrays', function () {
+    return co(function*(){
       var parts = busboy(request(), {
         autoFields: true
       });
@@ -58,11 +58,11 @@ describe('Co Busboy', function () {
       }
       assert.equal(Object.keys(parts.field).length, 2)
       assert.equal(parts.field['file_name_0'].length, 2)
-    })(done)
+    })
   })
 
-  it('should work with delays', function (done) {
-    co(function*(){
+  it('should work with delays', function () {
+    return co(function*(){
       var parts = busboy(request(), {
         autoFields: true
       });
@@ -74,11 +74,11 @@ describe('Co Busboy', function () {
         yield wait(10)
       }
       assert.equal(streams, 2)
-    })(done)
+    })
   })
 
-  it('should not overwrite prototypes', function (done) {
-    co(function*(){
+  it('should not overwrite prototypes', function () {
+    return co(function*(){
       var parts = busboy(request(), {
         autoFields: true
       });
@@ -87,11 +87,11 @@ describe('Co Busboy', function () {
         if (!part.length) part.resume()
       };
       assert.equal(parts.field.hasOwnProperty, Object.prototype.hasOwnProperty);
-    })(done)
+    })
   })
 
-  it('should throw error when the files limit is reached', function (done) {
-    co(function*(){
+  it('should throw error when the files limit is reached', function () {
+    return co(function*(){
       var parts = busboy(request(), {
         limits: {
           files: 1
@@ -110,7 +110,7 @@ describe('Co Busboy', function () {
       assert.equal(error.status, 413)
       assert.equal(error.code, 'Request_files_limit')
       assert.equal(error.message, 'Reach files limit')
-    })(done)
+    })
   })
 })
 
