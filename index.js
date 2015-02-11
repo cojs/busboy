@@ -3,7 +3,6 @@ var chan = require('chan')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
 var isArray = Array.isArray;
-var slice = [].slice
 
 module.exports = function (request, options) {
   var ch = chan()
@@ -57,8 +56,8 @@ module.exports = function (request, options) {
 
   return ch
 
-  function onField(name, val) {
-    var args = slice.call(arguments)
+  function onField(name, val, fieldnameTruncated, valTruncated) {
+    var args = [name, val, fieldnameTruncated, valTruncated]
 
     if (options.autoFields) {
       fields.push(args)
