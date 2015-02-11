@@ -2,7 +2,7 @@ BIN = ./node_modules/.bin/
 
 test:
 	@${BIN}mocha \
-		--harmony-generators \
+		--harmony \
 		--reporter spec \
 		--bail
 
