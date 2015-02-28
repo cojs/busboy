@@ -71,6 +71,39 @@ app.use(function* (next) {
 })
 ```
 
+### Example for csrf check
+
+Use `options.checkField` hook `function(name, val, fieldnameTruncated, valTruncated)`
+can handle request fields check.
+
+```js
+var parse = require('co-busboy')
+
+app.use(function* (next) {
+  var ctx = this
+  var parts = parse(this, {
+    checkField: function (name, value) {
+      if (name === '_csrf' && !checkCSRF(ctx, value)) {
+        return new Error('invaild csrf token')
+      }
+    }
+  })
+
+  var part
+  while (part = yield parts) {
+    if (part.length) {
+      // arrays are busboy fields
+      console.log('key: ' + part[0])
+      console.log('value: ' + part[1])
+    } else {
+      // otherwise, it's a stream
+      part.pipe(fs.createWriteStream('some file.txt'))
+    }
+  }
+  console.log('and we are done parsing the form!')
+})
+```
+
 ## API
 
 ### parts = parse(stream, [options])

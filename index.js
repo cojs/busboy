@@ -12,6 +12,9 @@ module.exports = function (request, options) {
 
   options = options || {}
   options.headers = request.headers
+  // options.checkField hook `function(name, val, fieldnameTruncated, valTruncated)`
+  // easy way to auto handle some check works, like csrf check
+  var checkField = options.checkField
 
   var busboy = new Busboy(options)
 
@@ -57,6 +60,13 @@ module.exports = function (request, options) {
   return ch
 
   function onField(name, val, fieldnameTruncated, valTruncated) {
+    if (checkField) {
+      var err = checkField(name, val, fieldnameTruncated, valTruncated)
+      if (err) {
+        return onEnd(err)
+      }
+    }
+
     var args = [name, val, fieldnameTruncated, valTruncated]
 
     if (options.autoFields) {
