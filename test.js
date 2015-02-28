@@ -13,6 +13,7 @@ describe('Co Busboy', function () {
       var streams = 0;
       while (part = yield parts) {
         if (part.length) {
+          assert.equal(part.length, 4)
           fields++
         } else {
           streams++
