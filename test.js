@@ -20,7 +20,7 @@ describe('Co Busboy', function () {
           part.resume()
         }
       }
-      assert.equal(fields, 4)
+      assert.equal(fields, 5)
       assert.equal(streams, 2)
     })
   })
@@ -43,8 +43,8 @@ describe('Co Busboy', function () {
       }
       assert.equal(fields, 0)
       assert.equal(streams, 2)
-      assert.equal(parts.fields.length, 4)
-      assert.equal(Object.keys(parts.field).length, 2)
+      assert.equal(parts.fields.length, 5)
+      assert.equal(Object.keys(parts.field).length, 3)
     })
   })
 
@@ -57,7 +57,7 @@ describe('Co Busboy', function () {
       while (part = yield parts) {
         part.resume()
       }
-      assert.equal(Object.keys(parts.field).length, 2)
+      assert.equal(Object.keys(parts.field).length, 3)
       assert.equal(parts.field['file_name_0'].length, 2)
     })
   })
@@ -113,6 +113,32 @@ describe('Co Busboy', function () {
       assert.equal(error.message, 'Reach files limit')
     })
   })
+
+  it('should use options.checkField do csrf check', function () {
+    return co(function*(){
+      var parts = busboy(request(), {
+        checkField: function (name, value) {
+          if (name === '_csrf' && value !== 'pass') {
+            return new Error('invaild csrf token')
+          }
+        }
+      });
+      var part
+      var fields = 0
+      try {
+        while (part = yield parts) {
+          if (part.length) {
+            assert.equal(part.length, 4)
+          } else {
+            part.resume()
+          }
+        }
+        throw new Error('should not run this')
+      } catch (err) {
+        assert.equal(err.message, 'invaild csrf token')
+      }
+    })
+  })
 })
 
 function wait(ms) {
@@ -143,6 +169,10 @@ function request() {
     'Content-Disposition: form-data; name="file_name_1"',
     '',
     'super gamma file',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="_csrf"',
+    '',
+    'ooxx',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="hasOwnProperty"',
     '',
