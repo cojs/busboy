@@ -13,8 +13,9 @@ module.exports = function (request, options) {
   options = options || {}
   options.headers = request.headers
   // options.checkField hook `function(name, val, fieldnameTruncated, valTruncated)`
-  // easy way to auto handle some check works, like csrf check
+  // options.checkFile hook `function(fieldname, fileStream, filename, encoding, mimetype)`
   var checkField = options.checkField
+  var checkFile = options.checkFile
 
   var busboy = new Busboy(options)
 
@@ -85,6 +86,13 @@ module.exports = function (request, options) {
   }
 
   function onFile(fieldname, file, filename, encoding, mimetype) {
+    if (checkFile) {
+      var err = checkFile(fieldname, file, filename, encoding, mimetype)
+      if (err) {
+        return onEnd(err)
+      }
+    }
+
     // opinionated, but 5 arguments is ridiculous
     file.fieldname = fieldname
     file.filename = filename

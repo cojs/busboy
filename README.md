@@ -74,7 +74,7 @@ app.use(function* (next) {
 ### Example for csrf check
 
 Use `options.checkField` hook `function(name, val, fieldnameTruncated, valTruncated)`
-can handle request fields check.
+can handle fields check.
 
 ```js
 var parse = require('co-busboy')
@@ -84,23 +84,44 @@ app.use(function* (next) {
   var parts = parse(this, {
     checkField: function (name, value) {
       if (name === '_csrf' && !checkCSRF(ctx, value)) {
-        return new Error('invaild csrf token')
+        var err =  new Error('invalid csrf token')
+        err.status = 400
+        return err
       }
     }
   })
-
   var part
   while (part = yield parts) {
-    if (part.length) {
-      // arrays are busboy fields
-      console.log('key: ' + part[0])
-      console.log('value: ' + part[1])
-    } else {
-      // otherwise, it's a stream
-      part.pipe(fs.createWriteStream('some file.txt'))
-    }
+    // ...
   }
-  console.log('and we are done parsing the form!')
+})
+```
+
+### Example for filename extension check
+
+Use `options.checkFile` hook `function(fieldname, file, filename, encoding, mimetype)`
+can handle filename check.
+
+```js
+var parse = require('co-busboy')
+var path = require('path')
+
+app.use(function* (next) {
+  var ctx = this
+  var parts = parse(this, {
+    // only allow upload `.jpg` files
+    checkFile: function (fieldname, file, filename) {
+      if (path.extname(filename) !== '.jpg') {
+        var err = new Error('invalid jpg image')
+        err.status = 400
+        return err
+      }
+    }
+  })
+  var part
+  while (part = yield parts) {
+    // ...
+  }
 })
 ```
 

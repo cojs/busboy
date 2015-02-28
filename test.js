@@ -1,6 +1,7 @@
 var co = require('co')
 var Stream = require('stream')
 var assert = require('assert')
+var path = require('path')
 
 var busboy = require('./')
 
@@ -119,7 +120,7 @@ describe('Co Busboy', function () {
       var parts = busboy(request(), {
         checkField: function (name, value) {
           if (name === '_csrf' && value !== 'pass') {
-            return new Error('invaild csrf token')
+            return new Error('invalid csrf token')
           }
         }
       });
@@ -135,7 +136,33 @@ describe('Co Busboy', function () {
         }
         throw new Error('should not run this')
       } catch (err) {
-        assert.equal(err.message, 'invaild csrf token')
+        assert.equal(err.message, 'invalid csrf token')
+      }
+    })
+  })
+
+  it('should use options.checkFile do filename extension check', function () {
+    return co(function*(){
+      var parts = busboy(request(), {
+        checkFile: function (fieldname, filestream, filename) {
+          if (path.extname(filename) !== '.jpg') {
+            return new Error('invalid filename extension')
+          }
+        }
+      });
+      var part
+      var fields = 0
+      try {
+        while (part = yield parts) {
+          if (part.length) {
+            assert.equal(part.length, 4)
+          } else {
+            part.resume()
+          }
+        }
+        throw new Error('should not run this')
+      } catch (err) {
+        assert.equal(err.message, 'invalid filename extension')
       }
     })
   })
