@@ -1,8 +1,13 @@
-BIN = ./node_modules/.bin/
 
 test:
-	@${BIN}mocha \
+	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--harmony \
+		--reporter spec \
+		--bail
+
+test-cov:
+	@NODE_ENV=test node --harmony node_modules/.bin/istanbul cover \
+		node_modules/.bin/_mocha -- \
 		--reporter spec \
 		--bail
 

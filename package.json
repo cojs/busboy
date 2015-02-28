@@ -23,10 +23,14 @@
   },
   "devDependencies": {
     "co": "*",
-    "mocha": "*",
-    "should": "*"
+    "istanbul-harmony": "*",
+    "mocha": "*"
   },
   "scripts": {
-    "test": "make test"
-  }
+    "test": "make test",
+    "test-cov": "make test-cov"
+  },
+  "files": [
+    "index.js"
+  ]
 }
