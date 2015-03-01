@@ -71,6 +71,60 @@ app.use(function* (next) {
 })
 ```
 
+### Example for csrf check
+
+Use `options.checkField` hook `function(name, val, fieldnameTruncated, valTruncated)`
+can handle fields check.
+
+```js
+var parse = require('co-busboy')
+
+app.use(function* (next) {
+  var ctx = this
+  var parts = parse(this, {
+    checkField: function (name, value) {
+      if (name === '_csrf' && !checkCSRF(ctx, value)) {
+        var err =  new Error('invalid csrf token')
+        err.status = 400
+        return err
+      }
+    }
+  })
+  var part
+  while (part = yield parts) {
+    // ...
+  }
+})
+```
+
+### Example for filename extension check
+
+Use `options.checkFile` hook `function(fieldname, file, filename, encoding, mimetype)`
+can handle filename check.
+
+```js
+var parse = require('co-busboy')
+var path = require('path')
+
+app.use(function* (next) {
+  var ctx = this
+  var parts = parse(this, {
+    // only allow upload `.jpg` files
+    checkFile: function (fieldname, file, filename) {
+      if (path.extname(filename) !== '.jpg') {
+        var err = new Error('invalid jpg image')
+        err.status = 400
+        return err
+      }
+    }
+  })
+  var part
+  while (part = yield parts) {
+    // ...
+  }
+})
+```
+
 ## API
 
 ### parts = parse(stream, [options])

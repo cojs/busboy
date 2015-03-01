@@ -12,6 +12,10 @@ module.exports = function (request, options) {
 
   options = options || {}
   options.headers = request.headers
+  // options.checkField hook `function(name, val, fieldnameTruncated, valTruncated)`
+  // options.checkFile hook `function(fieldname, fileStream, filename, encoding, mimetype)`
+  var checkField = options.checkField
+  var checkFile = options.checkFile
 
   var busboy = new Busboy(options)
 
@@ -57,6 +61,13 @@ module.exports = function (request, options) {
   return ch
 
   function onField(name, val, fieldnameTruncated, valTruncated) {
+    if (checkField) {
+      var err = checkField(name, val, fieldnameTruncated, valTruncated)
+      if (err) {
+        return onEnd(err)
+      }
+    }
+
     var args = [name, val, fieldnameTruncated, valTruncated]
 
     if (options.autoFields) {
@@ -75,6 +86,13 @@ module.exports = function (request, options) {
   }
 
   function onFile(fieldname, file, filename, encoding, mimetype) {
+    if (checkFile) {
+      var err = checkFile(fieldname, file, filename, encoding, mimetype)
+      if (err) {
+        return onEnd(err)
+      }
+    }
+
     // opinionated, but 5 arguments is ridiculous
     file.fieldname = fieldname
     file.filename = filename
