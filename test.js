@@ -21,8 +21,8 @@ describe('Co Busboy', function () {
           part.resume()
         }
       }
-      assert.equal(fields, 5)
-      assert.equal(streams, 2)
+      assert.equal(fields, 6)
+      assert.equal(streams, 3)
     })
   })
 
@@ -43,8 +43,8 @@ describe('Co Busboy', function () {
         }
       }
       assert.equal(fields, 0)
-      assert.equal(streams, 2)
-      assert.equal(parts.fields.length, 5)
+      assert.equal(streams, 3)
+      assert.equal(parts.fields.length, 6)
       assert.equal(Object.keys(parts.field).length, 3)
     })
   })
@@ -59,7 +59,8 @@ describe('Co Busboy', function () {
         part.resume()
       }
       assert.equal(Object.keys(parts.field).length, 3)
-      assert.equal(parts.field['file_name_0'].length, 2)
+      assert.equal(parts.field['file_name_0'].length, 3)
+      assert.deepEqual(parts.field['file_name_0'], [ 'super alpha file', 'super beta file', 'super gamma file' ])
     })
   })
 
@@ -75,7 +76,7 @@ describe('Co Busboy', function () {
         part.resume()
         yield wait(10)
       }
-      assert.equal(streams, 2)
+      assert.equal(streams, 3)
     })
   })
 
@@ -115,6 +116,52 @@ describe('Co Busboy', function () {
     })
   })
 
+  it('should throw error when the fields limit is reached', function () {
+    return co(function*(){
+      var parts = busboy(request(), {
+        limits: {
+          fields: 1
+        }
+      });
+      var part;
+      var error;
+      try {
+        while (part = yield parts) {
+          if (!part.length) part.resume()
+        }
+      } catch (e) {
+        error = e
+      }
+
+      assert.equal(error.status, 413)
+      assert.equal(error.code, 'Request_fields_limit')
+      assert.equal(error.message, 'Reach fields limit')
+    })
+  })
+
+  it('should throw error when the parts limit is reached', function () {
+    return co(function*(){
+      var parts = busboy(request(), {
+        limits: {
+          parts: 1
+        }
+      });
+      var part;
+      var error;
+      try {
+        while (part = yield parts) {
+          if (!part.length) part.resume()
+        }
+      } catch (e) {
+        error = e
+      }
+
+      assert.equal(error.status, 413)
+      assert.equal(error.code, 'Request_parts_limit')
+      assert.equal(error.message, 'Reach parts limit')
+    })
+  })
+
   it('should use options.checkField do csrf check', function () {
     return co(function*(){
       var parts = busboy(request(), {
@@ -145,7 +192,7 @@ describe('Co Busboy', function () {
     return co(function*(){
       var parts = busboy(request(), {
         checkFile: function (fieldname, filestream, filename) {
-          if (path.extname(filename) !== '.jpg') {
+          if (path.extname(filename) !== '.dat') {
             return new Error('invalid filename extension')
           }
         }
@@ -193,6 +240,10 @@ function request() {
     '',
     'super beta file',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="file_name_0"',
+    '',
+    'super gamma file',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="file_name_1"',
     '',
     'super gamma file',
@@ -214,7 +265,12 @@ function request() {
     'Content-Type: application/octet-stream',
     '',
     'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
-   '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k--'
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="upload_file_2"; filename="hack.exe"',
+    'Content-Type: application/octet-stream',
+    '',
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k--'
   ].join('\r\n'))
 
   return stream
