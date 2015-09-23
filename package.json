@@ -18,11 +18,13 @@
     "url": "https://github.com/cojs/co-busboy/issues"
   },
   "dependencies": {
+    "black-hole-stream": "~0.0.1",
     "busboy": "^0.2.8",
     "chan": "^0.6.1"
   },
   "devDependencies": {
     "co": "*",
+    "formstream": "~1.0.0",
     "istanbul": "*",
     "mocha": "*"
   },
