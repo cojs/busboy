@@ -2,7 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
-[![Test coverage][coveralls-image]][coveralls-url]
+[![Test coverage][codecov-image]][codecov-url]
 [![David deps][david-image]][david-url]
 [![npm download][download-image]][download-url]
 
@@ -10,8 +10,8 @@
 [npm-url]: https://npmjs.org/package/co-busboy
 [travis-image]: https://img.shields.io/travis/cojs/busboy.svg?style=flat-square
 [travis-url]: https://travis-ci.org/cojs/busboy
-[coveralls-image]: https://img.shields.io/coveralls/cojs/busboy.svg?style=flat-square
-[coveralls-url]: https://coveralls.io/r/cojs/busboy?branch=master
+[codecov-image]: https://codecov.io/github/cojs/busboy/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/cojs/busboy?branch=master
 [david-image]: https://img.shields.io/david/cojs/busboy.svg?style=flat-square
 [david-url]: https://david-dm.org/cojs/busboy
 [download-image]: https://img.shields.io/npm/dm/co-busboy.svg?style=flat-square

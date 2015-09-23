@@ -1,4 +1,11 @@
 
+1.3.1 / 2015-09-23
+==================
+
+ * test: use codecov.io instead of coveralls
+ * fix: need read all request's datas when error happened
+ * test: add node version 1, 2, 3, 4
+
 1.3.0 / 2015-03-02
 ==================
 
