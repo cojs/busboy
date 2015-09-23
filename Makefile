@@ -3,6 +3,7 @@ test:
 	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--harmony \
 		--reporter spec \
+		--timeout 5000 \
 		--bail
 
 test-cov:

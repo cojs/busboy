@@ -2,6 +2,8 @@ var co = require('co')
 var Stream = require('stream')
 var assert = require('assert')
 var path = require('path')
+var fs = require('fs')
+var formstream = require('formstream')
 
 var busboy = require('./')
 
@@ -213,6 +215,120 @@ describe('Co Busboy', function () {
       }
     })
   })
+
+  describe('checkFile()', function() {
+    var logfile = path.join(__dirname, 'test.log')
+    before(function() {
+      fs.writeFileSync(logfile, new Buffer(1024 * 1024 * 10))
+    })
+
+    after(function() {
+      fs.unlinkSync(logfile)
+    })
+
+    it('should checkFile fail', function() {
+      const form = formstream();
+
+      form.field('foo1', 'fengmk2').field('love', 'chair1')
+      form.file('file', logfile)
+      form.field('foo2', 'fengmk2').field('love', 'chair2')
+      form.headers = form.headers()
+      form.headers['content-type'] = form.headers['Content-Type']
+
+      return co(function*(){
+        var parts = busboy(form, {
+          checkFile: function (fieldname, fileStream, filename) {
+            var extname = filename && path.extname(filename);
+            if (!extname || ['.jpg', '.png'].indexOf(extname.toLowerCase()) === -1) {
+              var err = new Error('Invalid filename extension: ' + extname)
+              err.status = 400
+              return err
+            }
+          }
+        })
+
+        var part
+        var fileCount = 0
+        var fieldCount = 0
+        var err
+        while (true) {
+          try {
+            part = yield parts
+            if (!part) {
+              break;
+            }
+          } catch (e) {
+            err = e
+            break
+          }
+
+          if (!part.length) {
+            fileCount++
+            part.resume()
+          } else {
+            fieldCount++
+          }
+        }
+
+        assert.equal(fileCount, 0)
+        assert.equal(fieldCount, 4)
+        assert(err)
+        assert.equal(err.message, 'Invalid filename extension: .log')
+      })
+    })
+
+    it('should checkFile pass', function() {
+      const form = formstream();
+
+      form.field('foo1', 'fengmk2').field('love', 'chair1')
+      form.file('file', logfile)
+      form.field('foo2', 'fengmk2').field('love', 'chair2')
+      form.headers = form.headers()
+      form.headers['content-type'] = form.headers['Content-Type']
+
+      return co(function*(){
+        var parts = busboy(form, {
+          checkFile: function (fieldname, fileStream, filename) {
+            var extname = filename && path.extname(filename);
+            if (!extname || ['.jpg', '.png', '.log'].indexOf(extname.toLowerCase()) === -1) {
+              var err = new Error('Invalid filename extension: ' + extname)
+              err.status = 400
+              return err
+            }
+          }
+        })
+
+        var part
+        var fileCount = 0
+        var fieldCount = 0
+        var err
+        while (true) {
+          try {
+            part = yield parts
+            if (!part) {
+              break;
+            }
+          } catch (e) {
+            err = e
+            break
+          }
+
+          if (!part.length) {
+            fileCount++
+            part.resume()
+          } else {
+            fieldCount++
+          }
+        }
+
+        assert.equal(fileCount, 1)
+        assert.equal(fieldCount, 4)
+        assert(!err)
+      })
+    })
+
+  })
+
 })
 
 function wait(ms) {

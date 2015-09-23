@@ -1,5 +1,6 @@
 var Busboy = require('busboy')
 var chan = require('chan')
+var BlackHoleStream = require('black-hole-stream')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
 var isArray = Array.isArray;
@@ -16,6 +17,7 @@ module.exports = function (request, options) {
   // options.checkFile hook `function(fieldname, fileStream, filename, encoding, mimetype)`
   var checkField = options.checkField
   var checkFile = options.checkFile
+  var lastError;
 
   var busboy = new Busboy(options)
 
@@ -32,21 +34,21 @@ module.exports = function (request, options) {
     var err = new Error('Reach parts limit')
     err.code = 'Request_parts_limit'
     err.status = 413
-    onEnd(err)
+    onError(err)
   })
 
   busboy.on('filesLimit', function(){
     var err = new Error('Reach files limit')
     err.code = 'Request_files_limit'
     err.status = 413
-    onEnd(err)
+    onError(err)
   })
 
   busboy.on('fieldsLimit', function(){
     var err = new Error('Reach fields limit')
     err.code = 'Request_fields_limit'
     err.status = 413
-    onEnd(err)
+    onError(err)
   })
 
   request.pipe(busboy)
@@ -64,7 +66,7 @@ module.exports = function (request, options) {
     if (checkField) {
       var err = checkField(name, val, fieldnameTruncated, valTruncated)
       if (err) {
-        return onEnd(err)
+        return onError(err)
       }
     }
 
@@ -89,7 +91,10 @@ module.exports = function (request, options) {
     if (checkFile) {
       var err = checkFile(fieldname, file, filename, encoding, mimetype)
       if (err) {
-        return onEnd(err)
+        // make sure request stream's data has been read
+        var blackHoleStream = new BlackHoleStream();
+        file.pipe(blackHoleStream);
+        return onError(err)
       }
     }
 
@@ -101,9 +106,13 @@ module.exports = function (request, options) {
     ch(file)
   }
 
-  function onEnd(err) {
+  function onError(err) {
+    lastError = err;
+  }
+
+  function onEnd() {
     cleanup()
-    ch(err)
+    ch(lastError)
   }
 
   function cleanup() {
