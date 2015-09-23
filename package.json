@@ -11,11 +11,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jonathanong/co-busboy.git"
+    "url": "https://github.com/cojs/co-busboy.git"
   },
   "bugs": {
     "mail": "me@jongleberry.com",
-    "url": "https://github.com/jonathanong/co-busboy/issues"
+    "url": "https://github.com/cojs/co-busboy/issues"
   },
   "dependencies": {
     "busboy": "^0.2.8",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "co": "*",
-    "istanbul-harmony": "*",
+    "istanbul": "*",
     "mocha": "*"
   },
   "scripts": {
