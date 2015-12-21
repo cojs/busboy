@@ -29,8 +29,8 @@
     "mocha": "*"
   },
   "scripts": {
-    "test": "make test",
-    "test-cov": "make test-cov"
+    "test": "NODE_ENV=test mocha --harmony --reporter spec --bail",
+    "test-cov": "NODE_ENV=test istanbul cover -x test.js _mocha -- --reporter spec --bail"
   },
   "files": [
     "index.js"
