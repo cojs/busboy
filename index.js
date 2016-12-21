@@ -103,6 +103,7 @@ module.exports = function (request, options) {
     file.filename = filename
     file.transferEncoding = file.encoding = encoding
     file.mimeType = file.mime = mimetype
+    file.on('error', onEnd);
     ch(file)
   }
 
