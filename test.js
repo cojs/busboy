@@ -333,10 +333,12 @@ describe('Co Busboy', function () {
     it('should work without autofields', function () {
       return co(function*(){
         var parts = busboy(request())
+        var promise
         var part
         var fields = 0
         var streams = 0
-        while (part = yield parts()) {
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
           if (part.length) {
             assert.equal(part.length, 4)
             fields++
@@ -355,10 +357,12 @@ describe('Co Busboy', function () {
         var parts = busboy(request(), {
           autoFields: true
         })
+        var promise
         var part
         var fields = 0
         var streams = 0
-        while (part = yield parts()) {
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
           if (part.length) {
             fields++
           } else {
