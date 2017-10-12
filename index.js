@@ -3,10 +3,19 @@ var chan = require('chan')
 var BlackHoleStream = require('black-hole-stream')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
-var isArray = Array.isArray;
+var isArray = Array.isArray
 
 module.exports = function (request, options) {
   var ch = chan()
+  var parts = function (fn) {
+    if (fn) return ch(fn)
+    return new Promise(function (resolve, reject) {
+      ch(function (err, res) {
+        if (err) return reject(err)
+        resolve(res)
+      })
+    })
+  }
 
   // koa special sauce
   request = request.req || request
@@ -17,7 +26,7 @@ module.exports = function (request, options) {
   // options.checkFile hook `function(fieldname, fileStream, filename, encoding, mimetype)`
   var checkField = options.checkField
   var checkFile = options.checkFile
-  var lastError;
+  var lastError
 
   var busboy = new Busboy(options)
 
@@ -56,11 +65,11 @@ module.exports = function (request, options) {
   // i would just put everything in an array
   // but people will complain
   if (options.autoFields) {
-    var field = ch.field = {} // object lookup
-    var fields = ch.fields = [] // list lookup
+    var field = parts.field = {} // object lookup
+    var fields = parts.fields = [] // list lookup
   }
 
-  return ch
+  return parts
 
   function onField(name, val, fieldnameTruncated, valTruncated) {
     if (checkField) {
@@ -92,8 +101,8 @@ module.exports = function (request, options) {
       var err = checkFile(fieldname, file, filename, encoding, mimetype)
       if (err) {
         // make sure request stream's data has been read
-        var blackHoleStream = new BlackHoleStream();
-        file.pipe(blackHoleStream);
+        var blackHoleStream = new BlackHoleStream()
+        file.pipe(blackHoleStream)
         return onError(err)
       }
     }
@@ -107,7 +116,7 @@ module.exports = function (request, options) {
   }
 
   function onError(err) {
-    lastError = err;
+    lastError = err
   }
 
   function onEnd() {
