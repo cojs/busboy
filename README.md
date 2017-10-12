@@ -30,7 +30,7 @@ app.use(function* (next) {
 
   var parts = parse(this)
   var part
-  while (part = yield parts) {
+  while (part = yield parts()) {
     if (part.length) {
       // arrays are busboy fields
       console.log('key: ' + part[0])
@@ -59,7 +59,7 @@ app.use(function* (next) {
     autoFields: true
   })
   var part
-  while (part = yield parts) {
+  while (part = yield parts()) {
     // it's a stream
     part.pipe(fs.createWriteStream('some file.txt'))
   }
@@ -91,7 +91,7 @@ app.use(function* (next) {
     }
   })
   var part
-  while (part = yield parts) {
+  while (part = yield parts()) {
     // ...
   }
 })
@@ -119,7 +119,7 @@ app.use(function* (next) {
     }
   })
   var part
-  while (part = yield parts) {
+  while (part = yield parts()) {
     // ...
   }
 })
@@ -141,7 +141,7 @@ The only additional option is `autoFields`.
 
 **Note**: If busboy events `partsLimit`, `filesLimit`, `fieldsLimit` is emitted, will throw an error.
 
-### part = yield parts
+### part = yield parts()
 
 Yield the next part.
 If `autoFields: true`, this will always be a file stream.
