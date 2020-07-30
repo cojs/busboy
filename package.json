@@ -23,10 +23,10 @@
     "chan": "^0.6.1"
   },
   "devDependencies": {
-    "co": "*",
+    "co": "^4.6.0",
     "formstream": "~1.0.0",
-    "istanbul": "*",
-    "mocha": "*"
+    "istanbul": "^0.4.5",
+    "mocha": "^4.0.1"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha --harmony --reporter spec --bail",

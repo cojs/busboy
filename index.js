@@ -121,18 +121,17 @@ module.exports = function (request, options) {
 
   function onEnd() {
     cleanup()
+    busboy.removeListener('finish', onEnd)
+    busboy.removeListener('error', onEnd)
     ch(lastError)
   }
 
   function cleanup() {
+    // keep finish listener to wait all data flushed
+    // keep error listener to wait stream error
     request.removeListener('close', cleanup)
     busboy.removeListener('field', onField)
     busboy.removeListener('file', onFile)
     busboy.removeListener('close', cleanup)
-    busboy.removeListener('error', onEnd)
-    busboy.removeListener('partsLimit', onEnd)
-    busboy.removeListener('filesLimit', onEnd)
-    busboy.removeListener('fieldsLimit', onEnd)
-    busboy.removeListener('finish', onEnd)
   }
 }
