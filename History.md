@@ -1,4 +1,10 @@
 
+1.4.1 / 2020-07-30
+==================
+
+**fixes**
+  * [[`95127c9`](http://github.com/cojs/busboy/commit/95127c9ae202024b8117b35403cb52680b1aef81)] - fix: compatible with node14 (#42) (killa <<killa123@126.com>>)
+
 1.4.0 / 2017-10-12
 ==================
 
