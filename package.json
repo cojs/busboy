@@ -20,7 +20,8 @@
   "dependencies": {
     "black-hole-stream": "~0.0.1",
     "busboy": "^0.2.8",
-    "chan": "^0.6.1"
+    "chan": "^0.6.1",
+    "inflation": "^2.0.0"
   },
   "devDependencies": {
     "co": "^4.6.0",

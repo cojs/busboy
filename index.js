@@ -1,6 +1,7 @@
 var Busboy = require('busboy')
 var chan = require('chan')
 var BlackHoleStream = require('black-hole-stream')
+var inflate = require('inflation')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
 var isArray = Array.isArray
@@ -60,7 +61,7 @@ module.exports = function (request, options) {
     onError(err)
   })
 
-  request.pipe(busboy)
+  inflate(request).pipe(busboy)
 
   // i would just put everything in an array
   // but people will complain
