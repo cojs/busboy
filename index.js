@@ -31,6 +31,7 @@ module.exports = function (request, options) {
 
   var busboy = new Busboy(options)
 
+  request = inflate(request)
   request.on('close', cleanup)
 
   busboy
@@ -61,7 +62,7 @@ module.exports = function (request, options) {
     onError(err)
   })
 
-  inflate(request).pipe(busboy)
+  request.pipe(busboy)
 
   // i would just put everything in an array
   // but people will complain

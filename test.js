@@ -471,7 +471,7 @@ describe('Co Busboy', function () {
   describe('with wrong encoding', function() {
     it('will get nothing if set wrong encoding on gziped content', function () {
       return co(function*(){
-        let stream = gziped()
+        var stream = gziped()
         delete stream.headers['content-encoding']
         var parts = busboy(stream, {
           autoFields: true
@@ -559,14 +559,13 @@ function request() {
   return stream
 }
 
+
 function gziped() {
   // using `gzip` as demo, zlib support `deflate` as well
-  let stream = request()
+  var stream = request()
   const oldHeaders = stream.headers
   stream = stream.pipe(zlib.createGzip())
-  stream.headers = {
-    ...oldHeaders,
-    'content-encoding': 'gzip',
-  }
+  stream.headers = oldHeaders
+  stream.headers['content-encoding'] = 'gzip'
   return stream
 }
