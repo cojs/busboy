@@ -1,6 +1,7 @@
 var Busboy = require('busboy')
 var chan = require('chan')
 var BlackHoleStream = require('black-hole-stream')
+var inflate = require('inflation')
 
 var getDescriptor = Object.getOwnPropertyDescriptor
 var isArray = Array.isArray
@@ -30,6 +31,7 @@ module.exports = function (request, options) {
 
   var busboy = new Busboy(options)
 
+  request = inflate(request)
   request.on('close', cleanup)
 
   busboy

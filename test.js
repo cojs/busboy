@@ -4,7 +4,7 @@ var assert = require('assert')
 var path = require('path')
 var fs = require('fs')
 var formstream = require('formstream')
-
+const zlib = require('zlib');
 var busboy = require('./')
 
 describe('Co Busboy', function () {
@@ -28,9 +28,52 @@ describe('Co Busboy', function () {
     })
   })
 
+  it('should work without autofields on gziped content', function () {
+    return co(function*(){
+      var parts = busboy(gziped())
+      var part
+      var fields = 0
+      var streams = 0
+      while (part = yield parts) {
+        if (part.length) {
+          assert.equal(part.length, 4)
+          fields++
+        } else {
+          streams++
+          part.resume()
+        }
+      }
+      assert.equal(fields, 6)
+      assert.equal(streams, 3)
+    })
+  })
+
   it('should work with autofields', function () {
     return co(function*(){
       var parts = busboy(request(), {
+        autoFields: true
+      })
+      var part
+      var fields = 0
+      var streams = 0
+      while (part = yield parts) {
+        if (part.length) {
+          fields++
+        } else {
+          streams++
+          part.resume()
+        }
+      }
+      assert.equal(fields, 0)
+      assert.equal(streams, 3)
+      assert.equal(parts.fields.length, 6)
+      assert.equal(Object.keys(parts.field).length, 3)
+    })
+  })
+
+  it('should work with autofields on gziped content', function () {
+    return co(function*(){
+      var parts = busboy(gziped(), {
         autoFields: true
       })
       var part
@@ -352,6 +395,28 @@ describe('Co Busboy', function () {
       })
     })
 
+    it('should work without autofields on gziped content', function () {
+      return co(function*(){
+        var parts = busboy(gziped())
+        var promise
+        var part
+        var fields = 0
+        var streams = 0
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
+          if (part.length) {
+            assert.equal(part.length, 4)
+            fields++
+          } else {
+            streams++
+            part.resume()
+          }
+        }
+        assert.equal(fields, 6)
+        assert.equal(streams, 3)
+      })
+    })
+
     it('should work with autofields', function () {
       return co(function*(){
         var parts = busboy(request(), {
@@ -374,6 +439,60 @@ describe('Co Busboy', function () {
         assert.equal(streams, 3)
         assert.equal(parts.fields.length, 6)
         assert.equal(Object.keys(parts.field).length, 3)
+      })
+    })
+
+    it('should work with autofields on gziped content', function () {
+      return co(function*(){
+        var parts = busboy(gziped(), {
+          autoFields: true
+        })
+        var promise
+        var part
+        var fields = 0
+        var streams = 0
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
+          if (part.length) {
+            fields++
+          } else {
+            streams++
+            part.resume()
+          }
+        }
+        assert.equal(fields, 0)
+        assert.equal(streams, 3)
+        assert.equal(parts.fields.length, 6)
+        assert.equal(Object.keys(parts.field).length, 3)
+      })
+    })
+  })
+
+  describe('with wrong encoding', function() {
+    it('will get nothing if set wrong encoding on gziped content', function () {
+      return co(function*(){
+        var stream = gziped()
+        delete stream.headers['content-encoding']
+        var parts = busboy(stream, {
+          autoFields: true
+        })
+        var promise
+        var part
+        var fields = 0
+        var streams = 0
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
+          if (part.length) {
+            fields++
+          } else {
+            streams++
+            part.resume()
+          }
+        }
+        assert.equal(fields, 0)
+        assert.equal(streams, 0)
+        assert.equal(parts.fields.length, 0)
+        assert.equal(Object.keys(parts.field).length, 0)
       })
     })
   })
@@ -437,5 +556,16 @@ function request() {
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k--'
   ].join('\r\n'))
 
+  return stream
+}
+
+
+function gziped() {
+  // using `gzip` as demo, zlib support `deflate` as well
+  var stream = request()
+  const oldHeaders = stream.headers
+  stream = stream.pipe(zlib.createGzip())
+  stream.headers = oldHeaders
+  stream.headers['content-encoding'] = 'gzip'
   return stream
 }
