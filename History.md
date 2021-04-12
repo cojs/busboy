@@ -1,4 +1,10 @@
 
+1.5.0 / 2021-04-12
+==================
+
+**features**
+  * [[`e99083c`](http://github.com/cojs/busboy/commit/e99083c62f85a6bab84821cd677fc49e726a9ae8)] - feat: unzip http stream (#43) (Artin <<lengthmin@gmail.com>>)
+
 1.4.1 / 2020-07-30
 ==================
 
