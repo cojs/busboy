@@ -29,33 +29,33 @@ module.exports = function (request, options) {
   var checkFile = options.checkFile
   var lastError
 
-  var busboy = new Busboy(options)
+  var busboy = Busboy(options)
 
   request = inflate(request)
   request.on('close', cleanup)
 
   busboy
-  .on('field', onField)
-  .on('file', onFile)
-  .on('close', cleanup)
-  .on('error', onEnd)
-  .on('finish', onEnd)
+    .on('field', onField)
+    .on('file', onFile)
+    .on('close', cleanup)
+    .on('error', onEnd)
+    .on('finish', onEnd)
 
-  busboy.on('partsLimit', function(){
+  busboy.on('partsLimit', function () {
     var err = new Error('Reach parts limit')
     err.code = 'Request_parts_limit'
     err.status = 413
     onError(err)
   })
 
-  busboy.on('filesLimit', function(){
+  busboy.on('filesLimit', function () {
     var err = new Error('Reach files limit')
     err.code = 'Request_files_limit'
     err.status = 413
     onError(err)
   })
 
-  busboy.on('fieldsLimit', function(){
+  busboy.on('fieldsLimit', function () {
     var err = new Error('Reach fields limit')
     err.code = 'Request_fields_limit'
     err.status = 413
@@ -73,7 +73,9 @@ module.exports = function (request, options) {
 
   return parts
 
-  function onField(name, val, fieldnameTruncated, valTruncated) {
+  function onField(name, val, info) {
+    var fieldnameTruncated = info.nameTruncated
+    var valTruncated = info.valueTruncated
     if (checkField) {
       var err = checkField(name, val, fieldnameTruncated, valTruncated)
       if (err) {
@@ -81,7 +83,7 @@ module.exports = function (request, options) {
       }
     }
 
-    var args = [name, val, fieldnameTruncated, valTruncated]
+    var args = [ name, val, fieldnameTruncated, valTruncated ]
 
     if (options.autoFields) {
       fields.push(args)
@@ -89,16 +91,19 @@ module.exports = function (request, options) {
       // don't overwrite prototypes
       if (getDescriptor(Object.prototype, name)) return
 
-      var prev = field[name]
-      if (prev == null) return field[name] = val
+      var prev = field[ name ]
+      if (prev == null) return field[ name ] = val
       if (isArray(prev)) return prev.push(val)
-      field[name] = [prev, val]
+      field[ name ] = [ prev, val ]
     } else {
       ch(args)
     }
   }
 
-  function onFile(fieldname, file, filename, encoding, mimetype) {
+  function onFile(fieldname, file, info) {
+    var filename = info.filename
+    var encoding = info.encoding
+    var mimetype = info.mimeType
     if (checkFile) {
       var err = checkFile(fieldname, file, filename, encoding, mimetype)
       if (err) {
