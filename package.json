@@ -27,15 +27,14 @@
     "inflation": "^2.0.0"
   },
   "devDependencies": {
+    "c8": "^7.12.0",
     "co": "^4.6.0",
-    "formstream": "~1.0.0",
-    "istanbul": "^0.4.5",
+    "formstream": "^1.0.0",
     "mocha": "^4.0.1"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha --harmony --reporter spec --bail",
-    "test-cov": "NODE_ENV=test istanbul cover -x test.js _mocha -- --reporter spec --bail",
-    "ci": "npm run test-cov"
+    "test": "mocha .",
+    "ci": "c8 npm test"
   },
   "files": [
     "index.js"
