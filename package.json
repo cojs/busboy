@@ -17,21 +17,24 @@
     "mail": "me@jongleberry.com",
     "url": "https://github.com/cojs/co-busboy/issues"
   },
+  "engines": {
+    "node": ">= 14.0.0"
+  },
   "dependencies": {
     "black-hole-stream": "~0.0.1",
-    "busboy": "^0.2.8",
+    "busboy": "^1.6.0",
     "chan": "^0.6.1",
     "inflation": "^2.0.0"
   },
   "devDependencies": {
+    "c8": "^7.12.0",
     "co": "^4.6.0",
-    "formstream": "~1.0.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^4.0.1"
+    "formstream": "^1.0.0",
+    "mocha": "^10.0.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha --harmony --reporter spec --bail",
-    "test-cov": "NODE_ENV=test istanbul cover -x test.js _mocha -- --reporter spec --bail"
+    "test": "mocha **/*.test.js",
+    "ci": "c8 npm test"
   },
   "files": [
     "index.js"

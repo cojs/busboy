@@ -5,7 +5,7 @@ var path = require('path')
 var fs = require('fs')
 var formstream = require('formstream')
 const zlib = require('zlib');
-var busboy = require('./')
+var busboy = require('..')
 
 describe('Co Busboy', function () {
   it('should work without autofields', function () {
