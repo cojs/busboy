@@ -1,4 +1,10 @@
 
+2.0.0 / 2022-09-16
+==================
+
+**others**
+  * [[`d33789a`](http://github.com/cojs/busboy/commit/d33789a2af0b04fb9a68b1016a70857fc5f3c584)] - BREAKING CHANGE: update busboy to 1.x and node 14.x (#48) (TZ | 天猪 <<atian25@qq.com>>)
+
 1.5.0 / 2021-04-12
 ==================
 
