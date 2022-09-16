@@ -34,7 +34,8 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha --harmony --reporter spec --bail",
-    "test-cov": "NODE_ENV=test istanbul cover -x test.js _mocha -- --reporter spec --bail"
+    "test-cov": "NODE_ENV=test istanbul cover -x test.js _mocha -- --reporter spec --bail",
+    "ci": "npm run test-cov"
   },
   "files": [
     "index.js"
