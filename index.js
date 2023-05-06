@@ -101,6 +101,18 @@ module.exports = function (request, options) {
   }
 
   function onFile(fieldname, file, info) {
+    function onFileError(err) {
+      lastError = err
+    }
+    function onFileCleanup() {
+      file.removeListener('error', onFileError)
+      file.removeListener('end', onFileCleanup)
+      file.removeListener('close', onFileCleanup)
+    }
+    file.on('error', onFileError)
+    file.on('end', onFileCleanup)
+    file.on('close', onFileCleanup)
+
     var filename = info.filename
     var encoding = info.encoding
     var mimetype = info.mimeType
@@ -119,7 +131,6 @@ module.exports = function (request, options) {
     file.filename = filename
     file.transferEncoding = file.encoding = encoding
     file.mimeType = file.mime = mimetype
-    file.on('error', onError)
     ch(file)
   }
 

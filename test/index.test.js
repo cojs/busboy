@@ -262,7 +262,7 @@ describe('Co Busboy', function () {
   describe('checkFile()', function() {
     var logfile = path.join(__dirname, 'test.log')
     before(function() {
-      fs.writeFileSync(logfile, new Buffer(1024 * 1024 * 10))
+      fs.writeFileSync(logfile, Buffer.alloc(1024 * 1024 * 10))
     })
 
     after(function() {
@@ -498,9 +498,31 @@ describe('Co Busboy', function () {
   })
 
   describe('invalid multipart', function() {
-    it('should throw error: Unexpected end of form', function() {
+    it('should handle error: Unexpected end of form', function() {
       return co(function*(){
         var parts = busboy(invalidRequest());
+        var part;
+        try {
+          while (part = yield parts) {
+            if (!part.length) {
+              part.resume()
+            }
+          }
+
+          throw new Error('should not run this')
+        } catch (err) {
+          assert.equal(err.message, 'Unexpected end of form')
+        }
+      })
+    })
+
+    it('should handle error: Unexpected end of form with checkFile', function() {
+      return co(function*(){
+        var parts = busboy(invalidRequest(), {
+          checkFile: function () {
+            return new Error('invalid filename extension')
+          }
+        });
         var part;
         try {
           while (part = yield parts) {
