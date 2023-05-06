@@ -498,7 +498,7 @@ describe('Co Busboy', function () {
   })
 
   describe('invalid multipart', function() {
-    it('should throw error', function() {
+    it('should throw error: Unexpected end of form', function() {
       return co(function*(){
         var parts = busboy(invalidRequest());
         var part;
@@ -511,7 +511,7 @@ describe('Co Busboy', function () {
 
           throw new Error('should not run this')
         } catch (err) {
-          assert.equal(err.message, 'Part terminated early due to unexpected end of multipart data')
+          assert.equal(err.message, 'Unexpected end of form')
         }
       })
     })
@@ -614,3 +614,4 @@ function invalidRequest() {
 
   return stream
 }
+
