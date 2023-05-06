@@ -8,24 +8,22 @@ const zlib = require('zlib');
 var busboy = require('..')
 
 describe('Co Busboy', function () {
-  it('should work without autofields', function () {
-    return co(function*(){
-      var parts = busboy(request())
-      var part
-      var fields = 0
-      var streams = 0
-      while (part = yield parts) {
-        if (part.length) {
-          assert.equal(part.length, 4)
-          fields++
-        } else {
-          streams++
-          part.resume()
-        }
+  it('should work without autofields', async () => {
+    const parts = busboy(request())
+    let part
+    let fields = 0
+    let streams = 0
+    while (part = await parts()) {
+      if (part.length) {
+        assert.equal(part.length, 4)
+        fields++
+      } else {
+        streams++
+        part.resume()
       }
-      assert.equal(fields, 6)
-      assert.equal(streams, 3)
-    })
+    }
+    assert.equal(fields, 6)
+    assert.equal(streams, 3)
   })
 
   it('should work without autofields on gziped content', function () {
@@ -262,7 +260,7 @@ describe('Co Busboy', function () {
   describe('checkFile()', function() {
     var logfile = path.join(__dirname, 'test.log')
     before(function() {
-      fs.writeFileSync(logfile, new Buffer(1024 * 1024 * 10))
+      fs.writeFileSync(logfile, Buffer.alloc(1024 * 1024 * 10))
     })
 
     after(function() {
@@ -496,6 +494,48 @@ describe('Co Busboy', function () {
       })
     })
   })
+
+  describe('invalid multipart', function() {
+    it('should handle error: Unexpected end of form', function() {
+      return co(function*(){
+        var parts = busboy(invalidRequest());
+        var part;
+        try {
+          while (part = yield parts) {
+            if (!part.length) {
+              part.resume()
+            }
+          }
+
+          throw new Error('should not run this')
+        } catch (err) {
+          assert.equal(err.message, 'Unexpected end of form')
+        }
+      })
+    })
+
+    it('should handle error: Unexpected end of form with checkFile', function() {
+      return co(function*(){
+        var parts = busboy(invalidRequest(), {
+          checkFile: function () {
+            return new Error('invalid filename extension')
+          }
+        });
+        var part;
+        try {
+          while (part = yield parts) {
+            if (!part.length) {
+              part.resume()
+            }
+          }
+
+          throw new Error('should not run this')
+        } catch (err) {
+          assert.equal(err.message, 'Unexpected end of form')
+        }
+      })
+    })
+  })
 })
 
 function wait(ms) {
@@ -559,7 +599,6 @@ function request() {
   return stream
 }
 
-
 function gziped() {
   // using `gzip` as demo, zlib support `deflate` as well
   var stream = request()
@@ -567,5 +606,33 @@ function gziped() {
   stream = stream.pipe(zlib.createGzip())
   stream.headers = oldHeaders
   stream.headers['content-encoding'] = 'gzip'
+
   return stream
 }
+
+function invalidRequest() {
+  // https://github.com/mscdex/busboy/blob/master/test/test-types-multipart.js
+
+  var stream = new Stream.PassThrough()
+
+  stream.headers = {
+    'content-type': 'multipart/form-data; boundary=---------------------------paZqsnEHRufoShdX6fh0lUhXBP4k'
+  }
+
+  stream.end([
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="upload_file_0"; filename="1k_a.dat"',
+    'Content-Type: application/octet-stream',
+    '',
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    '-----------------------------invalid',
+    'Content-Disposition: form-data; name="upload_file_2"; filename="hack.exe"',
+    'Content-Type: application/octet-stream',
+    '',
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    '-----------------------------invalid--'
+  ].join('\r\n'))
+
+  return stream
+}
+
