@@ -579,7 +579,6 @@ function request() {
   return stream
 }
 
-
 function gziped() {
   // using `gzip` as demo, zlib support `deflate` as well
   var stream = request()
@@ -587,6 +586,8 @@ function gziped() {
   stream = stream.pipe(zlib.createGzip())
   stream.headers = oldHeaders
   stream.headers['content-encoding'] = 'gzip'
+
+  return stream
 }
 
 function invalidRequest() {
