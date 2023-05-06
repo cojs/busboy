@@ -8,24 +8,22 @@ const zlib = require('zlib');
 var busboy = require('..')
 
 describe('Co Busboy', function () {
-  it('should work without autofields', function () {
-    return co(function*(){
-      var parts = busboy(request())
-      var part
-      var fields = 0
-      var streams = 0
-      while (part = yield parts) {
-        if (part.length) {
-          assert.equal(part.length, 4)
-          fields++
-        } else {
-          streams++
-          part.resume()
-        }
+  it('should work without autofields', async () => {
+    const parts = busboy(request())
+    let part
+    let fields = 0
+    let streams = 0
+    while (part = await parts()) {
+      if (part.length) {
+        assert.equal(part.length, 4)
+        fields++
+      } else {
+        streams++
+        part.resume()
       }
-      assert.equal(fields, 6)
-      assert.equal(streams, 3)
-    })
+    }
+    assert.equal(fields, 6)
+    assert.equal(streams, 3)
   })
 
   it('should work without autofields on gziped content', function () {

@@ -1,19 +1,14 @@
 # co busboy
 
 [![NPM version][npm-image]][npm-url]
-[![build status][travis-image]][travis-url]
+[![Node.js CI](https://github.com/cojs/busboy/actions/workflows/nodejs.yml/badge.svg)](https://github.com/cojs/busboy/actions/workflows/nodejs.yml)
 [![Test coverage][codecov-image]][codecov-url]
-[![David deps][david-image]][david-url]
 [![npm download][download-image]][download-url]
 
 [npm-image]: https://img.shields.io/npm/v/co-busboy.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/co-busboy
-[travis-image]: https://img.shields.io/travis/cojs/busboy.svg?style=flat-square
-[travis-url]: https://travis-ci.org/cojs/busboy
 [codecov-image]: https://codecov.io/github/cojs/busboy/coverage.svg?branch=master
 [codecov-url]: https://codecov.io/github/cojs/busboy?branch=master
-[david-image]: https://img.shields.io/david/cojs/busboy.svg?style=flat-square
-[david-url]: https://david-dm.org/cojs/busboy
 [download-image]: https://img.shields.io/npm/dm/co-busboy.svg?style=flat-square
 [download-url]: https://npmjs.org/package/co-busboy
 
@@ -22,15 +17,15 @@
 ## Example
 
 ```js
-var parse = require('co-busboy')
+const parse = require('co-busboy')
 
-app.use(function* (next) {
+app.use(async (next) => {
   // the body isn't multipart, so busboy can't parse it
-  if (!this.request.is('multipart/*')) return yield next
+  if (!this.request.is('multipart/*')) return await next()
 
-  var parts = parse(this)
-  var part
-  while (part = yield parts()) {
+  const parts = parse(this)
+  let part
+  while (part = await parts()) {
     if (part.length) {
       // arrays are busboy fields
       console.log('key: ' + part[0])
@@ -52,14 +47,14 @@ set the `autoFields: true` option.
 Now all the parts will be streams and a field object and array will automatically be populated.
 
 ```js
-var parse = require('co-busboy')
+const parse = require('co-busboy')
 
-app.use(function* (next) {
-  var parts = parse(this, {
+app.use(async (next) => {
+  const parts = parse(this, {
     autoFields: true
   })
-  var part
-  while (part = yield parts()) {
+  let part
+  while (part = await parts()) {
     // it's a stream
     part.pipe(fs.createWriteStream('some file.txt'))
   }
@@ -77,12 +72,12 @@ Use `options.checkField` hook `function(name, val, fieldnameTruncated, valTrunca
 can handle fields check.
 
 ```js
-var parse = require('co-busboy')
+const parse = require('co-busboy')
 
-app.use(function* (next) {
-  var ctx = this
-  var parts = parse(this, {
-    checkField: function (name, value) {
+app.use(async (next) => {
+  const ctx = this
+  const parts = parse(this, {
+    checkField: (name, value) => {
       if (name === '_csrf' && !checkCSRF(ctx, value)) {
         var err =  new Error('invalid csrf token')
         err.status = 400
@@ -90,8 +85,8 @@ app.use(function* (next) {
       }
     }
   })
-  var part
-  while (part = yield parts()) {
+  let part
+  while (part = await parts()) {
     // ...
   }
 })
@@ -103,14 +98,14 @@ Use `options.checkFile` hook `function(fieldname, file, filename, encoding, mime
 can handle filename check.
 
 ```js
-var parse = require('co-busboy')
-var path = require('path')
+const parse = require('co-busboy')
+const path = require('path')
 
-app.use(function* (next) {
-  var ctx = this
-  var parts = parse(this, {
+app.use(async (next) => {
+  const ctx = this
+  const parts = parse(this, {
     // only allow upload `.jpg` files
-    checkFile: function (fieldname, file, filename) {
+    checkFile: (fieldname, file, filename) => {
       if (path.extname(filename) !== '.jpg') {
         var err = new Error('invalid jpg image')
         err.status = 400
@@ -118,8 +113,8 @@ app.use(function* (next) {
       }
     }
   })
-  var part
-  while (part = yield parts()) {
+  let part
+  while (part = await parts()) {
     // ...
   }
 })
@@ -130,8 +125,8 @@ app.use(function* (next) {
 ### parts = parse(stream, [options])
 
 ```js
-var parse = require('co-busboy')
-var parts = parse(stream, {
+const parse = require('co-busboy')
+const parts = parse(stream, {
   autoFields: true
 })
 ```
@@ -141,9 +136,9 @@ The only additional option is `autoFields`.
 
 **Note**: If busboy events `partsLimit`, `filesLimit`, `fieldsLimit` is emitted, will throw an error.
 
-### part = yield parts()
+### part = await parts()
 
-Yield the next part.
+Await the next part.
 If `autoFields: true`, this will always be a file stream.
 Otherwise, it will be a [field](https://github.com/mscdex/busboy#busboy-special-events) as an array.
 
