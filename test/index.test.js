@@ -496,6 +496,26 @@ describe('Co Busboy', function () {
       })
     })
   })
+
+  describe('invalid multipart', function() {
+    it('should throw error', function() {
+      return co(function*(){
+        var parts = busboy(invalidRequest());
+        var part;
+        try {
+          while (part = yield parts) {
+            if (!part.length) {
+              part.resume()
+            }
+          }
+
+          throw new Error('should not run this')
+        } catch (err) {
+          assert.equal(err.message, 'Part terminated early due to unexpected end of multipart data')
+        }
+      })
+    })
+  })
 })
 
 function wait(ms) {
@@ -567,5 +587,30 @@ function gziped() {
   stream = stream.pipe(zlib.createGzip())
   stream.headers = oldHeaders
   stream.headers['content-encoding'] = 'gzip'
+}
+
+function invalidRequest() {
+  // https://github.com/mscdex/busboy/blob/master/test/test-types-multipart.js
+
+  var stream = new Stream.PassThrough()
+
+  stream.headers = {
+    'content-type': 'multipart/form-data; boundary=---------------------------paZqsnEHRufoShdX6fh0lUhXBP4k'
+  }
+
+  stream.end([
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="upload_file_0"; filename="1k_a.dat"',
+    'Content-Type: application/octet-stream',
+    '',
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    '-----------------------------invalid',
+    'Content-Disposition: form-data; name="upload_file_2"; filename="hack.exe"',
+    'Content-Type: application/octet-stream',
+    '',
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    '-----------------------------invalid--'
+  ].join('\r\n'))
+
   return stream
 }
