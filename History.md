@@ -1,4 +1,10 @@
 
+2.0.1 / 2023-05-07
+==================
+
+**fixes**
+  * [[`448fc4b`](http://github.com/cojs/busboy/commit/448fc4b7af677009749a9f4ebfb9048ec3b20f53)] - fix: catch file stream error (#31) (Xin Hao <<haoxinst@gmail.com>>)
+
 2.0.0 / 2022-09-16
 ==================
 
