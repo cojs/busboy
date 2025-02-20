@@ -1,3 +1,4 @@
+var debug = require('util').debuglog('co-busboy')
 var Busboy = require('busboy')
 var chan = require('chan')
 var BlackHoleStream = require('black-hole-stream')
@@ -79,6 +80,7 @@ module.exports = function (request, options) {
     if (checkField) {
       var err = checkField(name, val, fieldnameTruncated, valTruncated)
       if (err) {
+        debug('onField error: %s', err)
         return onError(err)
       }
     }
@@ -102,9 +104,11 @@ module.exports = function (request, options) {
 
   function onFile(fieldname, file, info) {
     function onFileError(err) {
+      debug('onFileError: %s', err)
       lastError = err
     }
     function onFileCleanup() {
+      debug('onFileCleanup')
       file.removeListener('error', onFileError)
       file.removeListener('end', onFileCleanup)
       file.removeListener('close', onFileCleanup)
@@ -135,16 +139,27 @@ module.exports = function (request, options) {
   }
 
   function onError(err) {
+    debug('onError: %s', err)
     lastError = err
   }
 
-  function onEnd() {
+  function onEnd(err) {
     cleanup()
+    debug('onEnd error: %s', err)
     busboy.removeListener('finish', onEnd)
+    setImmediate(function () {
+      busboy.removeListener('error', onEnd)
+    })
+    // ignore Unexpected end of form
+    if (!lastError && err && err.message !== 'Unexpected end of form') {
+      lastError = err
+      debug('set lastError')
+    }
     ch(lastError)
   }
 
   function cleanup() {
+    debug('cleanup')
     // keep finish listener to wait all data flushed
     // keep error listener to wait stream error
     request.removeListener('close', cleanup)
