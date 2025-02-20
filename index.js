@@ -141,7 +141,6 @@ module.exports = function (request, options) {
   function onEnd() {
     cleanup()
     busboy.removeListener('finish', onEnd)
-    busboy.removeListener('error', onEnd)
     ch(lastError)
   }
 

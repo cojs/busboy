@@ -536,6 +536,34 @@ describe('Co Busboy', function () {
       })
     })
   })
+
+  describe('with malformat multipart', function() {
+    it('will get nothing if receive malformat multipart', function () {
+      return co(function*(){
+        var stream = malformatMultipart()
+        var parts = busboy(stream, {
+          autoFields: true
+        })
+        var promise
+        var part
+        var fields = 0
+        var streams = 0
+        while (promise = parts(), part = yield promise) {
+          assert(promise instanceof Promise)
+          if (part.length) {
+            fields++
+          } else {
+            streams++
+            part.resume()
+          }
+        }
+        assert.equal(fields, 0)
+        assert.equal(streams, 0)
+        assert.equal(parts.fields.length, 0)
+        assert.equal(Object.keys(parts.field).length, 0)
+      })
+    })
+  })
 })
 
 function wait(ms) {
@@ -636,3 +664,14 @@ function invalidRequest() {
   return stream
 }
 
+function malformatMultipart() {
+  var stream = new Stream.PassThrough()
+
+  stream.headers = {
+    'content-type': 'multipart/form-data; boundary=test123'
+  }
+
+  stream.end('--test123\r\nContent-Disposition: form-data; name="file"; filename="test.txt"\r\nhello\r\n--test123--\r\n')
+
+  return stream
+}
