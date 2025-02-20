@@ -548,14 +548,18 @@ describe('Co Busboy', function () {
         var part
         var fields = 0
         var streams = 0
-        while (promise = parts(), part = yield promise) {
-          assert(promise instanceof Promise)
-          if (part.length) {
-            fields++
-          } else {
-            streams++
-            part.resume()
+        try {
+          while (promise = parts(), part = yield promise) {
+            assert(promise instanceof Promise)
+            if (part.length) {
+              fields++
+            } else {
+              streams++
+              part.resume()
+            }
           }
+        } catch (err) {
+          assert.equal(err.message, 'Malformed part header')
         }
         assert.equal(fields, 0)
         assert.equal(streams, 0)
