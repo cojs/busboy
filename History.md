@@ -1,4 +1,10 @@
 
+2.0.2 / 2025-02-20
+==================
+
+**fixes**
+  * [[`c0fafde`](https://github.com/cojs/busboy/commit/86813312c340ad1bf59db349fda399347c0fafde)] - fix: catch 'Unexpected end of form' error when receive malformed multipart (#50) (dennisleung <<xiyuxistory@163.com>>)
+
 2.0.1 / 2023-05-07
 ==================
 
