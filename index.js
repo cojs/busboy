@@ -147,6 +147,7 @@ module.exports = function (request, options) {
     cleanup()
     debug('onEnd error: %s', err)
     busboy.removeListener('finish', onEnd)
+    // remove error listener in next event loop, catch the 'Unexpected end of form' error in next tick
     setImmediate(function () {
       busboy.removeListener('error', onEnd)
     })
